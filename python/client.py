@@ -37,7 +37,6 @@ top.title("SE3313 Chat App")
 
 frame = tkinter.Frame(top) # create GUI frame for message
 new_msg = tkinter.StringVar() # get input for messages to send
-new_msg.set("Type message here")
 scrollbar = tkinter.Scrollbar(frame) # can scroll along the frame
 
 msgs = tkinter.Listbox(frame, height=15, width=50, yscrollcommand=scrollbar.set) # set scrollbar parameters
