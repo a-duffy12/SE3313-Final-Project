@@ -23,19 +23,22 @@ def send(event=None):
 
     if msg == "{exit}": # client wants to leave chat room
         client_socket.close() # close client socket
-        top.quit() # exit tkinter
+        tkui.quit() # exit tkinter
 
 # function to close connection when closing GUI
 def close_process(event=None):
 
-    new_msg.set("{exit}") # set value of message to be 'exit'
-    send() # send message
+    if client_socket:
+        new_msg.set("{exit}") # set value of message to be 'exit'
+        send() # send message
+    else:
+        tkui.quit() # exit tkinter
 
 # tkinter variable declaration
-top = tkinter.Tk()
-top.title("SE3313 Chat App")
+tkui = tkinter.Tk()
+tkui.title("SE3313 Chat App")
 
-frame = tkinter.Frame(top) # create GUI frame for message
+frame = tkinter.Frame(tkui) # create GUI frame for message
 new_msg = tkinter.StringVar() # get input for messages to send
 scrollbar = tkinter.Scrollbar(frame) # can scroll along the frame
 
@@ -48,13 +51,13 @@ msgs.pack()
 frame.pack()
 
 # create fields to type text
-input_field = tkinter.Entry(top, textvariable=new_msg) # establish what variable gets updated with input
+input_field = tkinter.Entry(tkui, textvariable=new_msg) # establish what variable gets updated with input
 input_field.bind("<Return>", send) # bind field to send function
 input_field.pack()
-send_button = tkinter.Button(top, text="Send", command=send) # create a button to send the message
+send_button = tkinter.Button(tkui, text="Send", command=send) # create a button to send the message
 send_button.pack()
 
-top.protocol("WM_DELETE_WINDOW", close_process) # set protocol for exiting
+tkui.protocol("WM_DELETE_WINDOW", close_process) # set protocol for exiting
 
 # client variable declaration
 HOST = input("Enter host address: ")

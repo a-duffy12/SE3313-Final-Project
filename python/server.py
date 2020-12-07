@@ -2,6 +2,7 @@
 
 from socket import *
 from threading import Thread
+import sys, select
 
 # function to accept incoming connections
 def accept_connection():
@@ -12,6 +13,18 @@ def accept_connection():
         client.send(bytes("Type the name you wish to use.", "utf8"))
         adds[client] = client_address # store client address in list
         Thread(target=handle, args=(client,)).start()
+        cons.append(client) # add client to list of sockets
+       
+        print("Type '{done}' to terminate")
+        i, o, e = select.select([sys.stdin], [], [], 10)
+        
+        if (i):
+            if (sys.stdin.readline().strip() == "{done}"):
+                terminate()
+        else:
+            cmd = ""
+            continue
+
 
 # function to handle client actions by taking in a client
 def handle(c): 
@@ -32,6 +45,7 @@ def handle(c):
             del adds[c] # remove client's address from list of connected clients
             del clients[c] # remove client from list of connected clients
             del rooms[c] # remove client's room from list of open rooms
+            cons.remove(c) # remove client from list of sockets
             broadcast(bytes("%s has left the chat." % name, "utf8"), exit_room)
             break # stop handling this client
         
@@ -39,8 +53,6 @@ def handle(c):
             c.send(bytes("Type '{users}' to see all users in this room.", "utf8"))
             c.send(bytes("Type '{exit}' to leave. ", "utf8"))
             c.send(bytes("Type '{room}' to see all rooms.", "utf8")) 
-            
-            
         
         elif cmsg == bytes("{users}", "utf8"): # client wants a list of users in this room
             users = ""
@@ -63,12 +75,27 @@ def broadcast(msg, room, prefix = ""):
         if rooms[c] == room: # if the client is in that room
             c.send(bytes(prefix, "utf8") + msg) # send message to all relevant clients
 
-# variable declarations
-clients = {} # empty object array for clients
-adds = {} # empty object array for client addresses
-rooms = {} # empty object array for tracking which rooms clients are in
+# function to gracefully terminate all connected clients
+def terminate():
+    for i in cons:
+        i.send(bytes("Server has been terminated. Closing connection ...", "utf8"))
+        i.close() # close socket
+    SERVER.close()
 
-HOST = "" # IP of host 52.207.0.111
+# function to check for termination
+def term_loop():
+    cmd = input("\nType {done} to terminate server: ")
+
+    if (cmd == "{done}"):
+        terminate()
+
+# variable declarations
+cons = [] # list of sockets
+clients = {} # empty set array for clients
+adds = {} # empty set array for client addresses
+rooms = {} # empty set array for tracking which rooms clients are in
+
+HOST = "0.0.0.0" # IP of host 52.207.0.111
 PORT = 7777 # port number
 BUFFER = 1024 # buffer size
 ADDRESS = (HOST, PORT) # address of server
@@ -82,7 +109,7 @@ if __name__ == "__main__":
     SERVER.listen(5)
     print("Waiting for connections ...")
 
-    # create and manage a thread for the server
+    # create and manage threads for the server
     ACCEPT_THREAD = Thread(target=accept_connection)
     ACCEPT_THREAD.start()
     ACCEPT_THREAD.join()
