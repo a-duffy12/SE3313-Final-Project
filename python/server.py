@@ -15,16 +15,15 @@ def accept_connection():
         Thread(target=handle, args=(client,)).start()
         cons.append(client) # add client to list of sockets
        
-        print("Type '{done}' to terminate")
+        print("Press 'ENTER' within 15s of a connection to terminate")
+        print("\nOR")
+        print("Press 'ENTER' and then establish a new connection to terminate")
         i, o, e = select.select([sys.stdin], [], [], 10)
         
         if (i):
-            if (sys.stdin.readline().strip() == "{done}"):
-                terminate()
+            terminate()
         else:
-            cmd = ""
             continue
-
 
 # function to handle client actions by taking in a client
 def handle(c): 
@@ -81,13 +80,7 @@ def terminate():
         i.send(bytes("Server has been terminated. Closing connection ...", "utf8"))
         i.close() # close socket
     SERVER.close()
-
-# function to check for termination
-def term_loop():
-    cmd = input("\nType {done} to terminate server: ")
-
-    if (cmd == "{done}"):
-        terminate()
+    raise SystemExit
 
 # variable declarations
 cons = [] # list of sockets
