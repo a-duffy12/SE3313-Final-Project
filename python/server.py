@@ -16,9 +16,7 @@ def accept_connection():
         cons.append(client) # add client to list of sockets
        
         print("Press 'ENTER' within 15s of a connection to terminate")
-        print("\nOR")
-        print("Press 'ENTER' and then establish a new connection to terminate")
-        i, o, e = select.select([sys.stdin], [], [], 10)
+        i, o, e = select.select([sys.stdin], [], [], 15)
         
         if (i):
             terminate()
